@@ -213,3 +213,81 @@ h1, h2, h3, h4 { font-weight: 600; line-height: 1.3; }
 
 /* Glow effect */
 .glow-purple { box-shadow: 0 0 30px rgba(139,92,246,0.3); }
+
+/* Add these global mobile fixes to your existing index.css */
+/* Paste at the BOTTOM of your current index.css file */
+
+/* ── Global mobile base ── */
+* { box-sizing: border-box; }
+
+html, body {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ── Smooth scrolling tabs ── */
+::-webkit-scrollbar { height: 4px; width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.3); border-radius: 4px; }
+
+/* ── Inputs on mobile ── */
+@media (max-width: 640px) {
+  input, select, textarea {
+    font-size: 16px !important; /* prevents iOS zoom on focus */
+  }
+
+  /* Cards full width */
+  .card {
+    border-radius: 12px !important;
+    padding: 16px !important;
+  }
+
+  /* Buttons full width on mobile forms */
+  .btn-full-mobile {
+    width: 100% !important;
+  }
+
+  /* Hide scrollbar on tab rows */
+  .tab-row {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+  .tab-row::-webkit-scrollbar { display: none; }
+
+  /* Stat grids — 2 cols on mobile */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Main padding */
+  main {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+}
+
+/* ── Responsive grid helpers ── */
+@media (max-width: 480px) {
+  .grid-auto {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── KnowledgeEditor stats on mobile ── */
+@media (max-width: 640px) {
+  .knowledge-stats {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+  }
+}
+
+/* ── ChatBot button on mobile ── */
+@media (max-width: 640px) {
+  .chatbot-btn {
+    width: 48px !important;
+    height: 48px !important;
+    bottom: 16px !important;
+    right: 16px !important;
+  }
+}
