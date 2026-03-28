@@ -1,4 +1,5 @@
 // src/pages/Chart.js — Public chart page, fully responsive
+import YogaPanel from '../components/YogaPanel';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';

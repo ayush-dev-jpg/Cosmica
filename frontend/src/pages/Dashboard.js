@@ -1,4 +1,5 @@
 // src/pages/Dashboard.js
+// src/pages/Dashboard.js
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
@@ -6,6 +7,7 @@ import KundliChart from '../components/KundliChart';
 import CosmicSummary from '../components/CosmicSummary';
 import PlanetTable from '../components/PlanetTable';
 import PredictionCard from '../components/PredictionCard';
+import YogaPanel from '../components/YogaPanel';
 import ChatBot from '../components/ChatBot';
 import api from '../services/api';
 
@@ -214,12 +216,14 @@ export default function Dashboard() {
                   {contentTabBtn('planets',    '🌌 Planets',     activeTab==='planets')}
                   {contentTabBtn('summary',    '⭐ Summary',     activeTab==='summary')}
                   {contentTabBtn('prediction', '🔭 Predictions', activeTab==='prediction')}
+                  {contentTabBtn('yogas', '🔮 Yogas & Doshas', activeTab==='yogas')}
                 </div>
 
                 {activeTab==='chart'      && <KundliChart kundli={result.kundli} kundliId={result.kundli_id}/>}
                 {activeTab==='planets'    && <PlanetTable planets={result.kundli?.planetary_positions}/>}
                 {activeTab==='summary'    && <CosmicSummary kundli={result.kundli}/>}
                 {activeTab==='prediction' && <PredictionCard kundliId={result.kundli_id}/>}
+                {activeTab==='yogas' && <YogaPanel kundli={result.kundli}/>}
               </div>
             )}
 
