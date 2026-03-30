@@ -1,5 +1,5 @@
 # app/services/prediction.py
-from app.knowledge.ingestion import search_knowledge
+# chromadb removed
 from app.core.config import settings
 from app.core.database import db
 import httpx
