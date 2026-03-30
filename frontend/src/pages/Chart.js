@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import KundliChart from '../components/KundliChart';
+import DivisionalChart from '../components/DivisionalChart';
 import CosmicSummary from '../components/CosmicSummary';
 import PlanetTable from '../components/PlanetTable';
 import ChatBot from '../components/ChatBot';
@@ -200,6 +201,8 @@ export default function Chart() {
                 { id:'chart',   label:'🪐 Chart' },
                 { id:'planets', label:'🌌 Planets' },
                 { id:'summary', label:'⭐ Summary' },
+                { id:'d9',      label:'D9 Navamsa' },
+                { id:'d10',     label:'D10 Dasamsa' },
               ].map(t=>(
                 <button key={t.id} onClick={()=>setActiveTab(t.id)} style={{
                   padding:'10px 16px', background:'none', border:'none',
@@ -214,6 +217,8 @@ export default function Chart() {
             {activeTab==='chart'   && <KundliChart kundli={result.kundli} kundliId={result.kundli_id}/>}
             {activeTab==='planets' && <PlanetTable planets={result.kundli?.planetary_positions}/>}
             {activeTab==='summary' && <CosmicSummary kundli={result.kundli}/>}
+            {activeTab==='d9'  && <DivisionalChart chartData={result.kundli?.d9}  title="D9 Navamsa Chart" />}
+            {activeTab==='d10' && <DivisionalChart chartData={result.kundli?.d10} title="D10 Dasamsa Chart" />}
           </div>
         )}
       </main>
