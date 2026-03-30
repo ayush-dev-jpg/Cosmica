@@ -3,24 +3,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import auth, kundli, predictions, chat, admin, knowledge_editor, nakshatra, moon_sign, yoga_calculator
 
-app = FastAPI(
-    title="Cosmica API",
-    description="Vedic Astrology Platform API",
-    version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
-)
+app = FastAPI(title="Cosmica API", version="1.0.0", docs_url="/docs", redoc_url="/redoc")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "https://cosmica.app",
-        "https://cosmica-three.vercel.app",
-        "https://*.vercel.app",
-    ],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -37,7 +25,7 @@ app.include_router(yoga_calculator.router,  prefix="/api")
 
 @app.get("/")
 async def root():
-    return {"app": "Cosmica", "version": "1.0.0", "status": "running"}
+    return {"app": "Cosmica", "status": "running"}
 
 @app.get("/health")
 async def health_check():
