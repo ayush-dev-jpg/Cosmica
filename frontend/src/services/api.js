@@ -1,37 +1,17 @@
-// src/services/api.js
-// Central Axios instance — all API calls go through this
-// Automatically attaches JWT token to every request
-
 import axios from 'axios';
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+
 const api = axios.create({
-  baseURL: 'https://cosmica-production-ca94.up.railway.app/api',         
-  headers: { 'Content-Type': 'application/json' },
-  timeout: 30000,           // 30 second timeout
+  baseURL: API_URL,
 });
 
-// Request interceptor — attach token automatically
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('cosmica_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-// Response interceptor — handle 401 (expired token) globally
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('cosmica_token');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-);
+  return config;
+});
 
 export default api;
