@@ -5,7 +5,7 @@ from app.core.database import db
 from app.core.config import settings
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut
-import swisseph as swe
+from app.astrology.swisseph_compat import swe, SWE_AVAILABLE
 import pytz
 from datetime import datetime
 import httpx
@@ -34,6 +34,11 @@ class MoonSignRequest(BaseModel):
 
 @router.post("/find")
 async def find_moon_sign(req: MoonSignRequest):
+    if not SWE_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="Astrology engine unavailable: Swiss Ephemeris (pyswisseph) is not installed."
+        )
     # Geocode
     try:
         geolocator = Nominatim(user_agent="cosmica_moonsign")

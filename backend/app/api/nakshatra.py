@@ -1,13 +1,13 @@
 # app/api/nakshatra.py
 # Nakshatra calculation and description endpoint
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from app.core.database import db
 from app.core.config import settings
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut
-import swisseph as swe
+from app.astrology.swisseph_compat import swe, SWE_AVAILABLE
 import pytz
 from datetime import datetime
 import httpx
@@ -80,6 +80,11 @@ async def find_nakshatra(req: NakshatraRequest):
     Calculate the user's Nakshatra from birth details.
     Returns nakshatra info + your knowledge + AI reading.
     """
+    if not SWE_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="Astrology engine unavailable: Swiss Ephemeris (pyswisseph) is not installed."
+        )
 
     # Step 1: Geocode location
     try:

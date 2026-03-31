@@ -28,18 +28,22 @@ async def fetch_your_knowledge(kundli: dict) -> str:
 
     # 3. Your planet-in-house knowledge (lagna-specific first, then general)
     for planet, house_num in house_positions.items():
-        # Try lagna-specific first
+        # Try lagna-specific first, then general, then any available
         doc = await db.planet_house_knowledge.find_one({
             "planet": planet,
             "house":  house_num,
             "lagna":  lagna_name,
         })
         if not doc:
-            # Fall back to general
             doc = await db.planet_house_knowledge.find_one({
                 "planet": planet,
                 "house":  house_num,
                 "lagna":  None,
+            })
+        if not doc:
+            doc = await db.planet_house_knowledge.find_one({
+                "planet": planet,
+                "house":  house_num,
             })
         if doc and doc.get("text"):
             label = f"for {lagna_name} Lagna" if doc.get("lagna") else "(general)"

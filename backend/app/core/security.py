@@ -1,7 +1,7 @@
 # app/core/security.py
 # Handles password hashing, JWT token creation and verification
 
-from passlib.context import CryptContext
+import bcrypt
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from fastapi import Depends, HTTPException, status
@@ -10,24 +10,19 @@ from app.core.config import settings
 from app.core.database import users_collection
 from bson import ObjectId
 
-# Password hashing context using bcrypt
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 # OAuth2 scheme - looks for Bearer token in Authorization header
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
 
 def hash_password(password: str) -> str:
     """Convert plain text password to secure hash"""
-    # bcrypt has 72 byte limit — truncate to be safe
-    password = password[:72]
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Check if plain password matches stored hash"""
-    return pwd_context.verify(plain_password, hashed_password)
+    return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
 
 def create_access_token(data: dict) -> str:
     """Create a JWT token with expiry"""

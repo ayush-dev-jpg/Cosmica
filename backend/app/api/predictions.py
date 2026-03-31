@@ -22,10 +22,13 @@ async def create_prediction(
 
     # Fetch the Kundli from database
     try:
-        kundli_doc = await kundlis_collection.find_one({
-            "_id": ObjectId(req.kundli_id),
-            "user_id": str(current_user["_id"])
-        })
+        query = {"_id": ObjectId(req.kundli_id)}
+        if current_user:
+            # Match kundlis owned by this user OR created as guest
+            query["user_id"] = {"$in": [str(current_user["_id"]), "guest"]}
+        else:
+            query["user_id"] = "guest"
+        kundli_doc = await kundlis_collection.find_one(query)
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid Kundli ID")
 
@@ -37,7 +40,7 @@ async def create_prediction(
 
     # Save prediction to database
     pred_doc = {
-        "user_id": str(current_user["_id"]),
+        "user_id": str(current_user["_id"]) if current_user else "guest",
         "kundli_id": req.kundli_id,
         "person_name": kundli_doc.get("person_name"),
         **result,
@@ -54,7 +57,7 @@ async def create_prediction(
 async def get_prediction_history(current_user: dict = Depends(get_current_user)):
     """Get all past predictions for the current user"""
     cursor = predictions_collection.find(
-        {"user_id": str(current_user["_id"])},
+        {"user_id": {"$in": [str(current_user["_id"]), "guest"]}},
         sort=[("created_at", -1)],
         limit=20
     )

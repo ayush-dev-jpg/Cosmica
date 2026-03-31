@@ -244,6 +244,7 @@ async def get_house_description(req: HouseDescriptionRequest):
     # ── 1. Planet in House knowledge ─────────────────────────
     planet_house_parts = []
     for planet in req.planets:
+        # Try: 1) exact lagna, 2) general (lagna=None), 3) any available lagna
         doc = await db.planet_house_knowledge.find_one({
             "planet": planet, "house": req.house, "lagna": req.lagna,
         })
@@ -251,8 +252,12 @@ async def get_house_description(req: HouseDescriptionRequest):
             doc = await db.planet_house_knowledge.find_one({
                 "planet": planet, "house": req.house, "lagna": None,
             })
+        if not doc:
+            doc = await db.planet_house_knowledge.find_one({
+                "planet": planet, "house": req.house,
+            })
         if doc and doc.get("text"):
-            lagna_label = f"for {req.lagna} Lagna" if doc.get("lagna") else "(general)"
+            lagna_label = f"for {doc['lagna']} Lagna" if doc.get("lagna") else "(general)"
             planet_house_parts.append({
                 "title":  f"{planet} in House {req.house} {lagna_label}",
                 "text":   doc["text"],
@@ -275,8 +280,12 @@ async def get_house_description(req: HouseDescriptionRequest):
                 doc = await db.lord_in_house_knowledge.find_one({
                     "lord_house": owned_house, "placed_in_house": req.house, "lagna": None,
                 })
+            if not doc:
+                doc = await db.lord_in_house_knowledge.find_one({
+                    "lord_house": owned_house, "placed_in_house": req.house,
+                })
             if doc and doc.get("text"):
-                lagna_label = f"for {req.lagna} Lagna" if doc.get("lagna") else "(general)"
+                lagna_label = f"for {doc['lagna']} Lagna" if doc.get("lagna") else "(general)"
                 lord_house_parts.append({
                     "title":      f"{ORDINALS.get(owned_house,str(owned_house))} Lord ({planet}) in House {req.house} {lagna_label}",
                     "text":       doc["text"],

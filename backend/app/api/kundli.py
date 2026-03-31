@@ -48,7 +48,10 @@ async def create_kundli(
     timezone = get_timezone(lat, lon)
 
     # Step 3: Generate the full Kundli using Swiss Ephemeris
-    kundli_data = generate_kundli(data.date, data.time, lat, lon, timezone)
+    try:
+        kundli_data = generate_kundli(data.date, data.time, lat, lon, timezone)
+    except ImportError as e:
+        raise HTTPException(status_code=503, detail=str(e))
 
     # Step 4: Build document to save in MongoDB
     kundli_doc = {
@@ -81,7 +84,9 @@ async def create_kundli(
 @router.get("/my-charts")
 async def get_my_charts(current_user: dict = Depends(get_current_user)):
     """Get all saved Kundli charts for the current user"""
-    cursor = kundlis_collection.find({"user_id": str(current_user["_id"])})
+    cursor = kundlis_collection.find({
+        "user_id": {"$in": [str(current_user["_id"]), "guest"]}
+    })
     charts = []
     async for doc in cursor:
         charts.append({
@@ -104,7 +109,7 @@ async def get_kundli(
     try:
         doc = await kundlis_collection.find_one({
             "_id": ObjectId(kundli_id),
-            "user_id": str(current_user["_id"])
+            "user_id": {"$in": [str(current_user["_id"]), "guest"]}
         })
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid Kundli ID")
@@ -128,7 +133,7 @@ async def delete_kundli(
     """Delete a saved Kundli chart"""
     result = await kundlis_collection.delete_one({
         "_id": ObjectId(kundli_id),
-        "user_id": str(current_user["_id"])
+        "user_id": {"$in": [str(current_user["_id"]), "guest"]}
     })
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Kundli not found")
