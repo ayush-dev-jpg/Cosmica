@@ -5,7 +5,8 @@
 # Uses: Swiss Ephemeris (most accurate astronomical data)
 # =====================================================
 
-from app.astrology.swisseph_compat import swe, SWE_AVAILABLE
+import swisseph as swe
+SWE_AVAILABLE = True
 from datetime import datetime
 import pytz
 
