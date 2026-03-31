@@ -19,7 +19,11 @@ oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_e
 
 def hash_password(password: str) -> str:
     """Convert plain text password to secure hash"""
+    # bcrypt has 72 byte limit — truncate to be safe
+    password = password[:72]
     return pwd_context.hash(password)
+
+
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Check if plain password matches stored hash"""
