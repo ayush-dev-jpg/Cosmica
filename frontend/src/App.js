@@ -13,6 +13,7 @@ import KnowledgeEditor from './pages/KnowledgeEditor';
 import Nakshatra from './pages/Nakshatra';
 import NotFound        from './pages/NotFound';
 import MoonSign from './pages/MoonSign';
+import Compatibility from './pages/Compatibility';
 
 function ProtectedRoute({ children }) {
   const { isLoggedIn, loading } = useAuth();
@@ -44,6 +45,7 @@ function AppRoutes() {
       <Route path="/nakshatra" element={<OpenRoute><Nakshatra /></OpenRoute>} />
       <Route path="*"             element={<NotFound />} />
       <Route path="/moon-sign" element={<OpenRoute><MoonSign /></OpenRoute>} />
+      <Route path="/compatibility" element={<Compatibility/>} />
     </Routes>
   );
 }

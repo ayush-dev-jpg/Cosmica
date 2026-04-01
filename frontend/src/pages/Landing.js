@@ -80,6 +80,10 @@ export default function Landing() {
               style={{ padding:'11px 20px', fontSize:13 }}>
               🌙 Moon Sign
             </button>
+                      <button onClick={() => navigate('/compatibility')} className="btn btn-ghost"
+  style={{ padding:'11px 20px', fontSize:13 }}>
+  💑 Marriage Compatibility
+</button>
           </div>
         </div>
 
