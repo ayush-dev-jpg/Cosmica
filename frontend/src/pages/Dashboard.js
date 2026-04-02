@@ -10,6 +10,7 @@ import PredictionCard from '../components/PredictionCard';
 import YogaPanel from '../components/YogaPanel';
 import ChatBot from '../components/ChatBot';
 import api from '../services/api';
+import DashaTimeline from '../components/DashaTimeline';
 
 const COUNTRIES = [
   'India','USA','UK','Canada','Australia','UAE','Singapore',
@@ -219,6 +220,7 @@ export default function Dashboard() {
                   {contentTabBtn('yogas', '🔮 Yogas & Doshas', activeTab==='yogas')}
                   {contentTabBtn('d9',  'D9 Navamsa',  activeTab==='d9')}
                   {contentTabBtn('d10', 'D10 Dasamsa', activeTab==='d10')}
+                  {contentTabBtn('dasha', '🌟 Dasha', activeTab==='dasha')}
                 </div>
 
                 {activeTab==='chart'      && <KundliChart kundli={result.kundli} kundliId={result.kundli_id}/>}
@@ -228,6 +230,12 @@ export default function Dashboard() {
                 {activeTab==='yogas' && <YogaPanel kundli={result.kundli}/>}
                 {activeTab==='d9'  && <DivisionalChart chartData={result.kundli?.d9}  title="D9 Navamsa Chart" />}
                 {activeTab==='d10' && <DivisionalChart chartData={result.kundli?.d10} title="D10 Dasamsa Chart" />}
+                {activeTab==='dasha' && (
+  <DashaTimeline
+    kundli={result.kundli}
+    birthDate={result.birth_details?.date}
+  />
+)}
               </div>
             )}
 
