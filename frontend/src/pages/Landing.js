@@ -139,12 +139,30 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer style={{
-        borderTop:'1px solid var(--border)', padding:'18px 20px',
-        textAlign:'center', color:'var(--text-muted)', fontSize:12,
-      }}>
-        © 2024 Cosmica · Built with ✨ and Jyotish Shastra
-      </footer>
+<footer className="text-center py-4 text-gray-500">
+  © 2026 Cosmica · Built with Cosmos and Jyotish Shastra by{" "}
+
+  <span className="relative inline-block group">
+    <a
+      href="https://github.com/ayush-dev-jpg"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-indigo-400 hover:text-indigo-300 underline"
+    >
+      Ayush Srivastava
+    </a>
+
+    {/* Tooltip */}
+    <span
+      className="absolute left-1/2 -translate-x-1/2 bottom-6 
+                 opacity-0 group-hover:opacity-100 
+                 transition bg-gray-800 text-white text-xs 
+                 px-2 py-1 rounded shadow-lg whitespace-nowrap"
+    >
+      @ayush-dev-jpg
+    </span>
+  </span>
+</footer>
     </div>
   );
 }
