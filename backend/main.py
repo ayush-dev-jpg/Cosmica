@@ -1,21 +1,30 @@
 # main.py
-import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import auth, kundli, predictions, chat, admin, knowledge_editor, nakshatra, moon_sign, yoga_calculator, compatibility, dasha
-
+from fastapi.responses import JSONResponse
+from app.api import auth, kundli, predictions, chat, admin, knowledge_editor, nakshatra, moon_sign, yoga_calculator
 
 app = FastAPI(title="Cosmica API", version="1.0.0", docs_url="/docs", redoc_url="/redoc")
 
+# Handle OPTIONS preflight explicitly
+@app.options("/{rest_of_path:path}")
+async def preflight_handler(rest_of_path: str, request: Request):
+    return JSONResponse(
+        content={},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+        }
+    )
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        os.getenv("FRONTEND_URL", "http://localhost:3000"),
-        "http://localhost:3000",
-    ],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 app.include_router(auth.router,             prefix="/api")
@@ -27,9 +36,6 @@ app.include_router(knowledge_editor.router, prefix="/api")
 app.include_router(nakshatra.router,        prefix="/api")
 app.include_router(moon_sign.router,        prefix="/api")
 app.include_router(yoga_calculator.router,  prefix="/api")
-app.include_router(compatibility.router, prefix="/api")
-app.include_router(dasha.router, prefix="/api")
-
 
 @app.get("/")
 async def root():
