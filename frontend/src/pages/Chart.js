@@ -8,6 +8,7 @@ import DivisionalChart from '../components/DivisionalChart';
 import CosmicSummary from '../components/CosmicSummary';
 import PlanetTable from '../components/PlanetTable';
 import ChatBot from '../components/ChatBot';
+import DashaTimeline from '../components/DashaTimeline';
 import api from '../services/api';
 
 const COUNTRIES = [
@@ -203,6 +204,7 @@ export default function Chart() {
                 { id:'summary', label:'⭐ Summary' },
                 { id:'d9',      label:'D9 Navamsa' },
                 { id:'d10',     label:'D10 Dasamsa' },
+                { id:'dasha',   label:'🌟 Dasha' },
               ].map(t=>(
                 <button key={t.id} onClick={()=>setActiveTab(t.id)} style={{
                   padding:'10px 16px', background:'none', border:'none',
@@ -219,6 +221,7 @@ export default function Chart() {
             {activeTab==='summary' && <CosmicSummary kundli={result.kundli}/>}
             {activeTab==='d9'  && <DivisionalChart chartData={result.kundli?.d9}  title="D9 Navamsa Chart" />}
             {activeTab==='d10' && <DivisionalChart chartData={result.kundli?.d10} title="D10 Dasamsa Chart" />}
+            {activeTab==='dasha' && <DashaTimeline kundli={result.kundli} birthDate={result.birth_details?.date} />}
           </div>
         )}
       </main>

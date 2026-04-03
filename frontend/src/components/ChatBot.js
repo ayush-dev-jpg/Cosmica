@@ -17,10 +17,10 @@ export default function ChatBot({ kundliData }) {
       text: '🙏 Namaste! I am Cosmica, your personal Vedic astrology guide. Ask me anything about your birth chart, Nakshatras, Rashis, planetary influences, or Vedic astrology in general.',
     }
   ]);
-  const [input, setInput]     = useState('');
+  const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [open, setOpen]       = useState(false);
-  const bottomRef             = useRef(null);
+  const [open, setOpen] = useState(false);
+  const bottomRef = useRef(null);
 
   useEffect(() => {
     if (open) bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -35,14 +35,14 @@ export default function ChatBot({ kundliData }) {
     setLoading(true);
 
     try {
-      const res = await api.post('/chat/ask', {
+      const res = await api.post('/chat/message', {
         message: text,
-        kundli_context: kundliData || null,
+        kundli_data: kundliData || null,
       });
 
       setMessages(prev => [...prev, {
         role: 'assistant',
-        text: res.data.answer,
+        text: res.data.response,
       }]);
     } catch {
       setMessages(prev => [...prev, {
