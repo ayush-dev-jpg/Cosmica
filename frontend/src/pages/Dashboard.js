@@ -1,5 +1,6 @@
 // src/pages/Dashboard.js
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import KundliChart from '../components/KundliChart';
@@ -8,17 +9,152 @@ import CosmicSummary from '../components/CosmicSummary';
 import PlanetTable from '../components/PlanetTable';
 import PredictionCard from '../components/PredictionCard';
 import YogaPanel from '../components/YogaPanel';
+import DashaTimeline from '../components/DashaTimeline';
 import ChatBot from '../components/ChatBot';
 import api from '../services/api';
-import DashaTimeline from '../components/DashaTimeline';
 
 const COUNTRIES = [
   'India','USA','UK','Canada','Australia','UAE','Singapore',
   'Germany','France','Japan','Nepal','Sri Lanka','Other'
 ];
 
+const FREE_CHART_LIMIT = 2;
+
+// ── Paywall Modal (inline — no separate file needed) ──────────
+function PaywallModal({ feature, onClose }) {
+  const navigate = useNavigate();
+  return (
+    <div style={{
+      position:'fixed', inset:0, zIndex:1000,
+      background:'rgba(5,3,15,0.88)', backdropFilter:'blur(8px)',
+      display:'flex', alignItems:'center', justifyContent:'center', padding:20,
+    }} onClick={e => e.target===e.currentTarget && onClose()}>
+      <div style={{
+        background:'var(--bg-secondary)', border:'1px solid rgba(139,92,246,0.4)',
+        borderRadius:20, padding:'32px 28px', maxWidth:440, width:'100%',
+        boxShadow:'0 0 60px rgba(139,92,246,0.2)', position:'relative',
+      }}>
+        <button onClick={onClose} style={{
+          position:'absolute', top:14, right:16, background:'none', border:'none',
+          color:'var(--text-muted)', fontSize:20, cursor:'pointer',
+        }}>✕</button>
+
+        <div style={{ textAlign:'center', marginBottom:20 }}>
+          <div style={{
+            width:64, height:64, borderRadius:'50%', margin:'0 auto 14px',
+            background:'rgba(124,58,237,0.15)', border:'2px solid rgba(139,92,246,0.4)',
+            display:'flex', alignItems:'center', justifyContent:'center', fontSize:28,
+          }}>🔒</div>
+          <h2 style={{ fontSize:20, fontWeight:800, marginBottom:6 }}>Premium Feature</h2>
+          {feature && (
+            <p style={{ color:'var(--purple-400)', fontSize:14, fontWeight:600, marginBottom:6 }}>
+              {feature}
+            </p>
+          )}
+          <p style={{ color:'var(--text-secondary)', fontSize:13, lineHeight:1.7 }}>
+            Unlock deep AI-powered readings, Yoga calculator, Dasha timeline, marriage compatibility and much more.
+          </p>
+        </div>
+
+        {/* Feature list */}
+        <div style={{
+          padding:'14px 16px', borderRadius:12, marginBottom:18,
+          background:'rgba(139,92,246,0.07)', border:'1px solid rgba(139,92,246,0.18)',
+        }}>
+          {[
+            '✨ Unlimited Kundli charts',
+            '🔮 Yoga & Dosha calculator',
+            '🌟 Vimshottari Dasha timeline',
+            '💑 36 Guna marriage compatibility',
+            '🔭 Full AI predictions',
+            '📖 Lord in house readings',
+          ].map((f,i)=>(
+            <div key={i} style={{ fontSize:13, color:'var(--text-secondary)', marginBottom:5 }}>{f}</div>
+          ))}
+        </div>
+
+        <div style={{ textAlign:'center', marginBottom:14 }}>
+          <span style={{ fontSize:13, color:'var(--text-muted)' }}>Starting at just </span>
+          <span style={{ fontSize:26, fontWeight:800, color:'var(--purple-400)' }}>₹59</span>
+          <span style={{ fontSize:13, color:'var(--text-muted)' }}>/month</span>
+        </div>
+
+        <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+          <button onClick={() => navigate('/pricing')} style={{
+            width:'100%', padding:'14px', borderRadius:12,
+            background:'linear-gradient(135deg,#7c3aed,#4f46e5)',
+            border:'none', color:'white', fontSize:15, fontWeight:700, cursor:'pointer',
+            boxShadow:'0 4px 20px rgba(124,58,237,0.35)',
+          }}>✨ View Plans — From ₹59/month</button>
+          <button onClick={onClose} style={{
+            width:'100%', padding:'11px', borderRadius:12,
+            background:'none', border:'1px solid var(--border)',
+            color:'var(--text-secondary)', fontSize:13, cursor:'pointer',
+          }}>Maybe later</button>
+        </div>
+        <p style={{ textAlign:'center', fontSize:11, color:'var(--text-muted)', marginTop:10 }}>
+          Cancel anytime · No hidden fees
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ── Free tier banner ──────────────────────────────────────────
+function FreeTierBanner({ used, limit, onUpgrade }) {
+  const remaining = limit - used;
+  const pct = (used / limit) * 100;
+  if (used === 0) return null;
+  return (
+    <div style={{
+      padding:'12px 16px', borderRadius:10, marginBottom:16,
+      background: remaining === 0 ? 'rgba(239,68,68,0.08)' : 'rgba(245,158,11,0.08)',
+      border:`1px solid ${remaining===0?'rgba(239,68,68,0.3)':'rgba(245,158,11,0.3)'}`,
+      display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:10,
+    }}>
+      <div>
+        <div style={{ fontSize:13, fontWeight:600, color: remaining===0?'#f87171':'#f59e0b', marginBottom:3 }}>
+          {remaining===0 ? '⚠️ Free chart limit reached' : `✨ ${remaining} free chart${remaining!==1?'s':''} remaining`}
+        </div>
+        <div style={{ fontSize:11, color:'var(--text-muted)' }}>
+          {used}/{limit} charts used
+        </div>
+        {/* Progress bar */}
+        <div style={{ width:160, background:'rgba(255,255,255,0.08)', borderRadius:999, height:4, marginTop:6 }}>
+          <div style={{ width:`${pct}%`, height:'100%', borderRadius:999, background: remaining===0?'#ef4444':'#f59e0b' }}/>
+        </div>
+      </div>
+      <button onClick={onUpgrade} style={{
+        padding:'8px 16px', borderRadius:8, fontSize:12, fontWeight:700,
+        background:'linear-gradient(135deg,#7c3aed,#4f46e5)',
+        border:'none', color:'white', cursor:'pointer', flexShrink:0,
+      }}>💎 Upgrade ₹59/mo</button>
+    </div>
+  );
+}
+
+// ── Premium tab button (shows lock for non-premium) ───────────
+function PremiumTabBtn({ id, label, active, isPremium, onClick }) {
+  return (
+    <button onClick={onClick} style={{
+      padding:'9px 14px', background:'none', border:'none',
+      borderBottom: active ? '2px solid var(--purple-500)' : '2px solid transparent',
+      color: active ? 'var(--purple-400)' : 'var(--text-secondary)',
+      fontWeight: active ? 600 : 400,
+      fontSize:13, cursor:'pointer', marginBottom:-1, whiteSpace:'nowrap',
+      display:'flex', alignItems:'center', gap:5,
+      opacity: isPremium ? 1 : 0.7,
+    }}>
+      {label}
+      {!isPremium && <span style={{ fontSize:10 }}>🔒</span>}
+    </button>
+  );
+}
+
+// ── Main Dashboard ────────────────────────────────────────────
 export default function Dashboard() {
   const { user }                          = useAuth();
+  const navigate                          = useNavigate();
   const [tab, setTab]                     = useState('generate');
   const [form, setForm]                   = useState({ name:'', date:'', time:'', city:'', country:'India' });
   const [result, setResult]               = useState(null);
@@ -27,8 +163,30 @@ export default function Dashboard() {
   const [savedCharts, setSavedCharts]     = useState([]);
   const [chartsLoading, setChartsLoading] = useState(false);
   const [activeTab, setActiveTab]         = useState('chart');
+  const [showPaywall, setShowPaywall]     = useState(false);
+  const [paywallFeature, setPaywallFeature] = useState('');
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
+
+  // ── Premium check ─────────────────────────────────────────
+  const isPremium = user?.subscription === 'premium'
+                 || user?.subscription === 'yearly'
+                 || user?.role === 'admin';
+
+  // Chart count stored in localStorage per user
+  const chartKey      = `cosmica_charts_${user?.email || 'guest'}`;
+  const chartsUsed    = parseInt(localStorage.getItem(chartKey) || '0');
+  const chartsRemaining = Math.max(0, FREE_CHART_LIMIT - chartsUsed);
+
+  function triggerPaywall(feature) {
+    setPaywallFeature(feature);
+    setShowPaywall(true);
+  }
+
+  function handlePremiumTab(id, label) {
+    if (isPremium) { setActiveTab(id); return; }
+    triggerPaywall(label + ' requires Premium');
+  }
 
   useEffect(() => { loadSavedCharts(); }, []);
   useEffect(() => { if (tab === 'saved') loadSavedCharts(); }, [tab]);
@@ -44,10 +202,19 @@ export default function Dashboard() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    // Check free limit
+    if (!isPremium && chartsUsed >= FREE_CHART_LIMIT) {
+      triggerPaywall('Unlimited Charts');
+      return;
+    }
     setError(''); setLoading(true);
     try {
       const res = await api.post('/kundli/generate', form);
       setResult(res.data); setActiveTab('chart');
+      // Increment chart count for free users
+      if (!isPremium) {
+        localStorage.setItem(chartKey, chartsUsed + 1);
+      }
       loadSavedCharts();
     } catch (err) {
       setError(err.response?.data?.detail || 'Could not generate chart. Please check your birth details.');
@@ -65,7 +232,8 @@ export default function Dashboard() {
   async function handleLoadChart(chartId) {
     try {
       const res = await api.get(`/kundli/${chartId}`);
-      setResult({ kundli_id:chartId, person_name:res.data.person_name, birth_details:res.data.birth_details, kundli:res.data.kundli });
+      setResult({ kundli_id:chartId, person_name:res.data.person_name,
+        birth_details:res.data.birth_details, kundli:res.data.kundli });
       setTab('generate'); setActiveTab('chart');
       window.scrollTo({ top:0, behavior:'smooth' });
     } catch { alert('Could not load chart.'); }
@@ -81,7 +249,7 @@ export default function Dashboard() {
     }}>{label}</button>
   );
 
-  const contentTabBtn = (id, label, active) => (
+  const freeTabBtn = (id, label, active) => (
     <button key={id} onClick={() => setActiveTab(id)} style={{
       padding:'9px 14px', background:'none', border:'none',
       borderBottom: active ? '2px solid var(--purple-500)' : '2px solid transparent',
@@ -95,36 +263,68 @@ export default function Dashboard() {
     <div style={{ minHeight:'100vh', background:'var(--bg-primary)' }}>
       <Navbar />
 
+      {showPaywall && (
+        <PaywallModal feature={paywallFeature} onClose={() => setShowPaywall(false)}/>
+      )}
+
       <main style={{ maxWidth:1100, margin:'0 auto', padding:'24px 16px' }}>
 
         {/* Welcome */}
-        <div style={{ marginBottom:22 }}>
-          <h1 style={{ fontSize:'clamp(18px,4vw,26px)', fontWeight:700, marginBottom:4 }}>
-            Namaste, {user?.name?.split(' ')[0]} 🙏
-          </h1>
-          <p style={{ color:'var(--text-secondary)', fontSize:13 }}>
-            {savedCharts.length > 0
-              ? `You have ${savedCharts.length} saved chart${savedCharts.length>1?'s':''}`
-              : 'Generate your first Vedic birth chart below'}
-          </p>
+        <div style={{ marginBottom:22, display:'flex', justifyContent:'space-between', alignItems:'flex-start', flexWrap:'wrap', gap:10 }}>
+          <div>
+            <h1 style={{ fontSize:'clamp(18px,4vw,26px)', fontWeight:700, marginBottom:4 }}>
+              Namaste, {user?.name?.split(' ')[0]} 🙏
+            </h1>
+            <p style={{ color:'var(--text-secondary)', fontSize:13 }}>
+              {savedCharts.length > 0
+                ? `You have ${savedCharts.length} saved chart${savedCharts.length>1?'s':''}`
+                : 'Generate your first Vedic birth chart below'}
+            </p>
+          </div>
+          {!isPremium && (
+            <button onClick={() => navigate('/pricing')} style={{
+              padding:'8px 16px', borderRadius:8, fontSize:12, fontWeight:700,
+              background:'linear-gradient(135deg,#7c3aed,#4f46e5)',
+              border:'none', color:'white', cursor:'pointer',
+              boxShadow:'0 2px 12px rgba(124,58,237,0.3)',
+            }}>💎 Upgrade to Premium</button>
+          )}
+          {isPremium && (
+            <div style={{
+              padding:'5px 12px', borderRadius:999, fontSize:11, fontWeight:700,
+              background:'linear-gradient(135deg,rgba(124,58,237,0.2),rgba(79,70,229,0.2))',
+              border:'1px solid rgba(139,92,246,0.4)', color:'var(--purple-400)',
+            }}>✦ Premium</div>
+          )}
         </div>
 
         {/* Main tabs */}
         <div style={{ display:'flex', gap:4, marginBottom:24, borderBottom:'1px solid var(--border)', overflowX:'auto' }}>
           {tabBtn('generate', '✨ New Chart', tab==='generate')}
-          {tabBtn('saved',    `📚 Saved (${savedCharts.length})`, tab==='saved')}
+          {tabBtn('saved', `📚 Saved (${savedCharts.length})`, tab==='saved')}
         </div>
 
         {/* ── GENERATE TAB ── */}
         {tab==='generate' && (
           <div>
+            {/* Free tier banner */}
+            {!isPremium && (
+              <FreeTierBanner
+                used={chartsUsed}
+                limit={FREE_CHART_LIMIT}
+                onUpgrade={() => navigate('/pricing')}
+              />
+            )}
+
             {/* Birth form */}
             <div className="card" style={{ marginBottom:20 }}>
               <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:18 }}>
                 <span style={{ fontSize:24 }}>🔮</span>
                 <div>
                   <h2 style={{ fontSize:16, fontWeight:700, marginBottom:2 }}>Generate Kundli</h2>
-                  <p style={{ color:'var(--text-secondary)', fontSize:12 }}>Charts are automatically saved to your account</p>
+                  <p style={{ color:'var(--text-secondary)', fontSize:12 }}>
+                    {isPremium ? 'Unlimited charts · Premium account' : `${chartsRemaining} of ${FREE_CHART_LIMIT} free charts remaining`}
+                  </p>
                 </div>
               </div>
 
@@ -137,10 +337,8 @@ export default function Dashboard() {
               )}
 
               <form onSubmit={handleSubmit}>
-                {/* Responsive grid — 1 col mobile, 2 col tablet, 3 col desktop */}
                 <div style={{
-                  display:'grid',
-                  gridTemplateColumns:'repeat(auto-fit, minmax(140px, 1fr))',
+                  display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(140px, 1fr))',
                   gap:12, marginBottom:14,
                 }}>
                   <div style={{ gridColumn:'span 2' }}>
@@ -191,7 +389,6 @@ export default function Dashboard() {
             {/* Results */}
             {!loading && result && (
               <div className="fade-in">
-                {/* Result header */}
                 <div style={{ marginBottom:18 }}>
                   <h2 style={{ fontSize:'clamp(16px,3vw,20px)', fontWeight:700, marginBottom:6 }}>
                     ✨ {result.person_name}'s Kundli
@@ -207,39 +404,35 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* Content tabs — scrollable on mobile */}
+                {/* Content tabs */}
                 <div style={{
                   display:'flex', gap:2, marginBottom:18,
                   borderBottom:'1px solid var(--border)',
                   overflowX:'auto', WebkitOverflowScrolling:'touch',
                 }}>
-                  {contentTabBtn('chart',      '🪐 Chart',       activeTab==='chart')}
-                  {contentTabBtn('planets',    '🌌 Planets',     activeTab==='planets')}
-                  {contentTabBtn('summary',    '⭐ Summary',     activeTab==='summary')}
-                  {contentTabBtn('prediction', '🔭 Predictions', activeTab==='prediction')}
-                  {contentTabBtn('yogas', '🔮 Yogas & Doshas', activeTab==='yogas')}
-                  {contentTabBtn('d9',  'D9 Navamsa',  activeTab==='d9')}
-                  {contentTabBtn('d10', 'D10 Dasamsa', activeTab==='d10')}
-                  {contentTabBtn('dasha', '🌟 Dasha', activeTab==='dasha')}
+                  {/* Free tabs */}
+                  {freeTabBtn('chart',   '🪐 Chart',   activeTab==='chart')}
+                  {freeTabBtn('planets', '🌌 Planets', activeTab==='planets')}
+                  {freeTabBtn('summary', '⭐ Summary', activeTab==='summary')}
+                  {/* Premium tabs */}
+                  <PremiumTabBtn id="prediction" label="🔭 Predictions"    active={activeTab==='prediction'} isPremium={isPremium} onClick={()=>handlePremiumTab('prediction','Predictions')}/>
+                  <PremiumTabBtn id="yogas"      label="🔮 Yogas & Doshas" active={activeTab==='yogas'}      isPremium={isPremium} onClick={()=>handlePremiumTab('yogas','Yoga & Dosha Calculator')}/>
+                  <PremiumTabBtn id="dasha"      label="🌟 Dasha"          active={activeTab==='dasha'}      isPremium={isPremium} onClick={()=>handlePremiumTab('dasha','Dasha Timeline')}/>
+                  <PremiumTabBtn id="d9"         label="D9 Navamsa"        active={activeTab==='d9'}         isPremium={isPremium} onClick={()=>handlePremiumTab('d9','D9 Navamsa Chart')}/>
+                  <PremiumTabBtn id="d10"        label="D10 Dasamsa"       active={activeTab==='d10'}        isPremium={isPremium} onClick={()=>handlePremiumTab('d10','D10 Dasamsa Chart')}/>
                 </div>
 
                 {activeTab==='chart'      && <KundliChart kundli={result.kundli} kundliId={result.kundli_id}/>}
                 {activeTab==='planets'    && <PlanetTable planets={result.kundli?.planetary_positions}/>}
                 {activeTab==='summary'    && <CosmicSummary kundli={result.kundli}/>}
-                {activeTab==='prediction' && <PredictionCard kundliId={result.kundli_id}/>}
-                {activeTab==='yogas' && <YogaPanel kundli={result.kundli}/>}
-                {activeTab==='d9'  && <DivisionalChart chartData={result.kundli?.d9}  title="D9 Navamsa Chart" />}
-                {activeTab==='d10' && <DivisionalChart chartData={result.kundli?.d10} title="D10 Dasamsa Chart" />}
-                {activeTab==='dasha' && (
-  <DashaTimeline
-    kundli={result.kundli}
-    birthDate={result.birth_details?.date}
-  />
-)}
+                {activeTab==='prediction' && isPremium && <PredictionCard kundliId={result.kundli_id}/>}
+                {activeTab==='yogas'      && isPremium && <YogaPanel kundli={result.kundli}/>}
+                {activeTab==='dasha'      && isPremium && <DashaTimeline kundli={result.kundli} birthDate={result.birth_details?.date}/>}
+                {activeTab==='d9'         && isPremium && <DivisionalChart chartData={result.kundli?.d9}  title="D9 Navamsa Chart"/>}
+                {activeTab==='d10'        && isPremium && <DivisionalChart chartData={result.kundli?.d10} title="D10 Dasamsa Chart"/>}
               </div>
             )}
 
-            {/* Empty state */}
             {!loading && !result && (
               <div style={{ textAlign:'center', padding:'40px 0', color:'var(--text-muted)' }}>
                 <div style={{ fontSize:52, marginBottom:10 }}>🪐</div>
@@ -265,11 +458,7 @@ export default function Dashboard() {
                 <button className="btn btn-primary" onClick={() => setTab('generate')}>✨ Generate Chart</button>
               </div>
             ) : (
-              <div style={{
-                display:'grid',
-                gridTemplateColumns:'repeat(auto-fill, minmax(260px, 1fr))',
-                gap:14,
-              }}>
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(260px, 1fr))', gap:14 }}>
                 {savedCharts.map(chart => (
                   <div key={chart.id} className="card">
                     <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:12 }}>
@@ -285,7 +474,6 @@ export default function Dashboard() {
                         color:'#f87171', borderRadius:6, cursor:'pointer',
                       }}>🗑️</button>
                     </div>
-
                     <div style={{ display:'flex', flexDirection:'column', gap:5, marginBottom:12 }}>
                       {[
                         ['Nakshatra', chart.nakshatra],
@@ -300,7 +488,6 @@ export default function Dashboard() {
                         </div>
                       ))}
                     </div>
-
                     <button className="btn btn-primary" style={{ width:'100%', padding:'10px' }}
                       onClick={() => handleLoadChart(chart.id)}>
                       View Full Chart
