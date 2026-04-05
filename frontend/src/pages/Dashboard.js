@@ -504,3 +504,18 @@ export default function Dashboard() {
     </div>
   );
 }
+import FullPredictions from '../components/FullPredictions';
+
+// Add tab button (premium):
+<PremiumTabBtn id="readings" label="📖 Readings" active={activeTab==='readings'}
+  isPremium={isPremium} onClick={()=>handlePremiumTab('readings','Full Predictions')}/>
+
+// Add tab content:
+{activeTab==='readings' && isPremium && (
+  <FullPredictions
+    kundli={result.kundli}
+    lagna={result.kundli?.lagna?.name}
+    personName={result.person_name}
+    kundliId={result.kundli_id}
+  />
+)}
