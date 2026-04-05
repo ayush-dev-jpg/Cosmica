@@ -12,6 +12,8 @@ import YogaPanel from '../components/YogaPanel';
 import DashaTimeline from '../components/DashaTimeline';
 import ChatBot from '../components/ChatBot';
 import api from '../services/api';
+import FullPredictions from '../components/FullPredictions';
+
 
 const COUNTRIES = [
   'India','USA','UK','Canada','Australia','UAE','Singapore',
@@ -150,6 +152,7 @@ function PremiumTabBtn({ id, label, active, isPremium, onClick }) {
     </button>
   );
 }
+
 
 // ── Main Dashboard ────────────────────────────────────────────
 export default function Dashboard() {
@@ -420,6 +423,8 @@ export default function Dashboard() {
                   <PremiumTabBtn id="dasha"      label="🌟 Dasha"          active={activeTab==='dasha'}      isPremium={isPremium} onClick={()=>handlePremiumTab('dasha','Dasha Timeline')}/>
                   <PremiumTabBtn id="d9"         label="D9 Navamsa"        active={activeTab==='d9'}         isPremium={isPremium} onClick={()=>handlePremiumTab('d9','D9 Navamsa Chart')}/>
                   <PremiumTabBtn id="d10"        label="D10 Dasamsa"       active={activeTab==='d10'}        isPremium={isPremium} onClick={()=>handlePremiumTab('d10','D10 Dasamsa Chart')}/>
+                    <PremiumTabBtn id="readings" label="📖 Readings" active={activeTab==='readings'}
+  isPremium={isPremium} onClick={()=>handlePremiumTab('readings','Full Predictions')}/>
                 </div>
 
                 {activeTab==='chart'      && <KundliChart kundli={result.kundli} kundliId={result.kundli_id}/>}
@@ -430,6 +435,14 @@ export default function Dashboard() {
                 {activeTab==='dasha'      && isPremium && <DashaTimeline kundli={result.kundli} birthDate={result.birth_details?.date}/>}
                 {activeTab==='d9'         && isPremium && <DivisionalChart chartData={result.kundli?.d9}  title="D9 Navamsa Chart"/>}
                 {activeTab==='d10'        && isPremium && <DivisionalChart chartData={result.kundli?.d10} title="D10 Dasamsa Chart"/>}
+                {activeTab==='readings' && isPremium && (
+  <FullPredictions
+    kundli={result.kundli}
+    lagna={result.kundli?.lagna?.name}
+    personName={result.person_name}
+    kundliId={result.kundli_id}
+  />
+)}
               </div>
             )}
 
