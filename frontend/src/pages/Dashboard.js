@@ -13,6 +13,7 @@ import DashaTimeline from '../components/DashaTimeline';
 import ChatBot from '../components/ChatBot';
 import api from '../services/api';
 import FullPredictions from '../components/FullPredictions';
+import Reports from '../components/Reports';
 
 
 const COUNTRIES = [
@@ -425,6 +426,8 @@ export default function Dashboard() {
                   <PremiumTabBtn id="d10"        label="D10 Dasamsa"       active={activeTab==='d10'}        isPremium={isPremium} onClick={()=>handlePremiumTab('d10','D10 Dasamsa Chart')}/>
                     <PremiumTabBtn id="readings" label="📖 Readings" active={activeTab==='readings'}
   isPremium={isPremium} onClick={()=>handlePremiumTab('readings','Full Predictions')}/>
+                    <PremiumTabBtn id="reports" label="📄 Reports" active={activeTab==='reports'}
+  isPremium={isPremium} onClick={()=>handlePremiumTab('reports','Detailed Reports')}/>
                 </div>
 
                 {activeTab==='chart'      && <KundliChart kundli={result.kundli} kundliId={result.kundli_id}/>}
@@ -437,6 +440,14 @@ export default function Dashboard() {
                 {activeTab==='d10'        && isPremium && <DivisionalChart chartData={result.kundli?.d10} title="D10 Dasamsa Chart"/>}
                 {activeTab==='readings' && isPremium && (
   <FullPredictions
+    kundli={result.kundli}
+    lagna={result.kundli?.lagna?.name}
+    personName={result.person_name}
+    kundliId={result.kundli_id}
+  />
+)}
+                {activeTab==='reports' && isPremium && (
+  <Reports
     kundli={result.kundli}
     lagna={result.kundli?.lagna?.name}
     personName={result.person_name}
