@@ -17,6 +17,7 @@ export default function Navbar() {
     { path:'/chart',      label:'🪐 Kundli' },
     { path:'/nakshatra',  label:'⭐ Nakshatra' },
     { path:'/moon-sign',  label:'🌙 Moon Sign' },
+    { path:'/panchang', label:'🗓️ Panchang' },
   ];
   const ADMIN_LINKS = [
     { path:'/my-knowledge', label:'📖 My Knowledge' },
