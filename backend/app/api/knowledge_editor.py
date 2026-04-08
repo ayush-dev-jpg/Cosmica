@@ -388,3 +388,52 @@ Be specific to {req.lagna} Lagna."""
         "planet_sign_parts":  planet_sign_parts,
         "ai_description":     ai_description,
     }
+# Add this to the END of your knowledge_editor.py file
+# (paste before the last line if any)
+
+# ── Separate AI reading endpoint (lazy-loaded) ────────────────
+
+class AIReadingRequest(BaseModel):
+    house:               int
+    lagna:               str
+    planets:             List[str]
+    house_rashi:         str
+    house_rashi_en:      str
+    house_lord:          str
+    your_knowledge_text: Optional[str] = ""
+
+@router.post("/ai-reading")
+async def get_ai_reading(req: AIReadingRequest):
+    """Called only when user explicitly clicks 'Generate AI Reading'"""
+    if not settings.OPENAI_API_KEY or not settings.OPENAI_API_KEY.startswith("sk-"):
+        return {"ai_description": "AI not configured."}
+    try:
+        planets_str = ", ".join(req.planets) if req.planets else "no planets"
+        system = "You are Cosmica, an expert Vedic astrologer. Give specific, insightful readings based on the astrologer's knowledge provided."
+        user_prompt = f"""House {req.house} for {req.lagna} Lagna.
+Sign: {req.house_rashi_en} ({req.house_rashi}), Lord: {req.house_lord}
+Planets here: {planets_str}
+
+{f"Astrologer's personal knowledge (use this as the foundation):{chr(10)}{req.your_knowledge_text}" if req.your_knowledge_text else "No personal knowledge entered yet — give a general Vedic reading."}
+
+Give a detailed, specific Vedic reading for this house for {req.lagna} Lagna. Be concrete and personal."""
+
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers={"Authorization": f"Bearer {settings.OPENAI_API_KEY}", "Content-Type": "application/json"},
+                json={
+                    "model": "gpt-4o-mini",
+                    "messages": [
+                        {"role": "system", "content": system},
+                        {"role": "user",   "content": user_prompt}
+                    ],
+                    "temperature": 0.7,
+                    "max_tokens": 700
+                },
+                timeout=25.0
+            )
+            data = response.json()
+            return {"ai_description": data["choices"][0]["message"]["content"]}
+    except Exception as e:
+        return {"ai_description": f"Could not generate AI reading: {str(e)}"}
