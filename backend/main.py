@@ -2,7 +2,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from app.api import auth, kundli, predictions, chat, admin, knowledge_editor, nakshatra, moon_sign, yoga_calculator, dasha
+from app.api import auth, kundli, predictions, chat, admin, knowledge_editor, nakshatra, moon_sign, yoga_calculator, dasha, reports
 
 app = FastAPI(title="Cosmica API", version="1.0.0", docs_url="/docs", redoc_url="/redoc")
 
@@ -37,6 +37,7 @@ app.include_router(nakshatra.router,        prefix="/api")
 app.include_router(moon_sign.router,        prefix="/api")
 app.include_router(yoga_calculator.router,  prefix="/api")
 app.include_router(dasha.router,            prefix="/api")
+app.include_router(reports.router,          prefix="/api")
 
 @app.get("/")
 async def root():

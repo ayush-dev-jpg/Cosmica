@@ -11,6 +11,7 @@ import YogaPanel from '../components/YogaPanel';
 import ChatBot from '../components/ChatBot';
 import api from '../services/api';
 import DashaTimeline from '../components/DashaTimeline';
+import ReportDownloader from '../components/ReportDownloader';
 
 const COUNTRIES = [
   'India','USA','UK','Canada','Australia','UAE','Singapore',
@@ -221,6 +222,7 @@ export default function Dashboard() {
                   {contentTabBtn('d9',  'D9 Navamsa',  activeTab==='d9')}
                   {contentTabBtn('d10', 'D10 Dasamsa', activeTab==='d10')}
                   {contentTabBtn('dasha', '🌟 Dasha', activeTab==='dasha')}
+                  {contentTabBtn('reports', '📄 Reports', activeTab==='reports')}
                 </div>
 
                 {activeTab==='chart'      && <KundliChart kundli={result.kundli} kundliId={result.kundli_id}/>}
@@ -236,6 +238,7 @@ export default function Dashboard() {
     birthDate={result.birth_details?.date}
   />
 )}
+                {activeTab==='reports' && <ReportDownloader kundliId={result.kundli_id} />}
               </div>
             )}
 
