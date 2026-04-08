@@ -242,7 +242,7 @@ export default function Reports({ kundli, lagna, personName, kundliId }) {
   async function downloadPDF() {
     setPdfLoading(true);
     try {
-      const res = await api.post('/reports/download-pdf', {
+      const res = await api.post('/report/generate', {
         kundli,
         lagna,
         report_type: selectedType,
@@ -271,7 +271,7 @@ export default function Reports({ kundli, lagna, personName, kundliId }) {
     setError('');
     setReport(null);
     try {
-      const res = await api.post('/reports/generate', {
+      const res = await api.post('/report/preview-status', {
         kundli,
         lagna,
         report_type: type,
