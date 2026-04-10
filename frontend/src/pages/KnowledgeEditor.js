@@ -66,6 +66,7 @@ export default function KnowledgeEditor() {
   }
 
   async function loadEntries() {
+    // Load all entry types
     try {
       const res = await api.get('/knowledge-editor/planet-house');
       setEntries(res.data.entries || []);
@@ -434,7 +435,10 @@ export default function KnowledgeEditor() {
                     <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:12 }}>
                       <div style={{ flex:1 }}>
                         <div style={{ fontWeight:600, fontSize:14, marginBottom:6, display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
-                          {entry.planet} in House {entry.house}
+                          {entry._type === 'lord_house'
+                            ? `${entry.lord_house ? entry.lord_house + 'th' : '?'} Lord in House ${entry.placed_in_house || '?'}${entry.lagna ? ' ('+entry.lagna+')' : ''}`
+                            : `${entry.planet || '?'} in House ${entry.house || '?'}${entry.lagna ? ' ('+entry.lagna+')' : ''}`
+                          }
                           {entry.lagna ? (
                             <span style={{ padding:'2px 8px', background:'rgba(168,85,247,0.15)', color:'var(--purple-400)', borderRadius:999, fontSize:11 }}>
                               {entry.lagna} Lagna
