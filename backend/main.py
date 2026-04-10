@@ -6,17 +6,7 @@ from app.api import auth, kundli, predictions, chat, admin, knowledge_editor, na
 
 app = FastAPI(title="Cosmica API", version="1.0.0", docs_url="/docs", redoc_url="/redoc")
 
-# Handle OPTIONS preflight explicitly
-@app.options("/{rest_of_path:path}")
-async def preflight_handler(rest_of_path: str, request: Request):
-    return JSONResponse(
-        content={},
-        headers={
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers": "*",
-        }
-    )
+
 
 app.add_middleware(
     CORSMiddleware,
