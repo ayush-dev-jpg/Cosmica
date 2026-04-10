@@ -10,8 +10,16 @@ import PredictionCard from '../components/PredictionCard';
 import YogaPanel from '../components/YogaPanel';
 import ChatBot from '../components/ChatBot';
 import api from '../services/api';
+<<<<<<< Updated upstream
 import DashaTimeline from '../components/DashaTimeline';
 import ReportDownloader from '../components/ReportDownloader';
+=======
+import FullPredictions from '../components/FullPredictions';
+import Reports from '../components/Reports';
+import ReportGenerator from '../components/ReportGenerator';
+
+
+>>>>>>> Stashed changes
 
 const COUNTRIES = [
   'India','USA','UK','Canada','Australia','UAE','Singapore',
@@ -214,6 +222,7 @@ export default function Dashboard() {
                   borderBottom:'1px solid var(--border)',
                   overflowX:'auto', WebkitOverflowScrolling:'touch',
                 }}>
+<<<<<<< Updated upstream
                   {contentTabBtn('chart',      '🪐 Chart',       activeTab==='chart')}
                   {contentTabBtn('planets',    '🌌 Planets',     activeTab==='planets')}
                   {contentTabBtn('summary',    '⭐ Summary',     activeTab==='summary')}
@@ -223,6 +232,24 @@ export default function Dashboard() {
                   {contentTabBtn('d10', 'D10 Dasamsa', activeTab==='d10')}
                   {contentTabBtn('dasha', '🌟 Dasha', activeTab==='dasha')}
                   {contentTabBtn('reports', '📄 Reports', activeTab==='reports')}
+=======
+                  {/* Free tabs */}
+                  {freeTabBtn('chart',   '🪐 Chart',   activeTab==='chart')}
+                  {freeTabBtn('planets', '🌌 Planets', activeTab==='planets')}
+                  {freeTabBtn('summary', '⭐ Summary', activeTab==='summary')}
+                  {/* Premium tabs */}
+                  <PremiumTabBtn id="prediction" label="🔭 Predictions"    active={activeTab==='prediction'} isPremium={isPremium} onClick={()=>handlePremiumTab('prediction','Predictions')}/>
+                  <PremiumTabBtn id="yogas"      label="🔮 Yogas & Doshas" active={activeTab==='yogas'}      isPremium={isPremium} onClick={()=>handlePremiumTab('yogas','Yoga & Dosha Calculator')}/>
+                  <PremiumTabBtn id="dasha"      label="🌟 Dasha"          active={activeTab==='dasha'}      isPremium={isPremium} onClick={()=>handlePremiumTab('dasha','Dasha Timeline')}/>
+                  <PremiumTabBtn id="d9"         label="D9 Navamsa"        active={activeTab==='d9'}         isPremium={isPremium} onClick={()=>handlePremiumTab('d9','D9 Navamsa Chart')}/>
+                  <PremiumTabBtn id="d10"        label="D10 Dasamsa"       active={activeTab==='d10'}        isPremium={isPremium} onClick={()=>handlePremiumTab('d10','D10 Dasamsa Chart')}/>
+                    <PremiumTabBtn id="readings" label="📖 Readings" active={activeTab==='readings'}
+  isPremium={isPremium} onClick={()=>handlePremiumTab('readings','Full Predictions')}/>
+                    <PremiumTabBtn id="reports" label="📄 Reports" active={activeTab==='reports'}
+  isPremium={isPremium} onClick={()=>handlePremiumTab('reports','Detailed Reports')}/>
+  <PremiumTabBtn id="report" label="📄 PDF Report" active={activeTab==='report'}
+  isPremium={isPremium} onClick={()=>handlePremiumTab('report','PDF Report')}/>
+>>>>>>> Stashed changes
                 </div>
 
                 {activeTab==='chart'      && <KundliChart kundli={result.kundli} kundliId={result.kundli_id}/>}
@@ -238,7 +265,19 @@ export default function Dashboard() {
     birthDate={result.birth_details?.date}
   />
 )}
+<<<<<<< Updated upstream
                 {activeTab==='reports' && <ReportDownloader kundliId={result.kundli_id} />}
+=======
+{activeTab==='report' && isPremium && (
+  <ReportGenerator
+    kundli={result.kundli}
+    lagna={result.kundli?.lagna?.name}
+    personName={result.person_name}
+    birthDetails={result.birth_details}
+    isPremium={isPremium}
+  />
+)}
+>>>>>>> Stashed changes
               </div>
             )}
 
