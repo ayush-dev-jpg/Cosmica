@@ -347,7 +347,7 @@ class CosmicaPDFReport(FPDF):
                     self.set_font('Helvetica', '', 9)
                     self.set_text_color(*MEDIUM_TEXT)
                     self.set_x(14)
-                    self.cell(0, 6, f'{'-'} {d["planet"]}: {d["start"]} to {d["end"]} ({d.get("duration_years", 0)} years)')
+                    self.cell(0, 6, "- " + d["planet"] + ": " + d["start"] + " to " + d["end"] + " (" + str(d.get("duration_years", 0)) + " years)")
                     self.ln()
 
     def add_disclaimer(self):
