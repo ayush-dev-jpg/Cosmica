@@ -232,7 +232,7 @@ function ReportSection({ section, reportColor, index }) {
 }
 
 // ── Main Reports Component ───────────────────────────────────
-export default function Reports({ kundli, lagna, personName, kundliId }) {
+export default function Reports({ kundli, lagna, personName, kundliId, birthDate, birthTime, birthPlace, moonRashi }) {
   const [selectedType, setSelectedType] = useState(null);
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -242,12 +242,10 @@ export default function Reports({ kundli, lagna, personName, kundliId }) {
   async function downloadPDF() {
     setPdfLoading(true);
     try {
-      const res = await api.post('/report/generate', {
-        kundli,
-        lagna,
-        report_type: selectedType,
-        person_name: personName,
-      }, { responseType: 'blob' });
+const res = await api.post('/report/generate', {
+  kundli, lagna, report_type: selectedType, person_name: personName,
+  birth_date: birthDate || '', birth_time: birthTime || '', birth_place: birthPlace || '',
+}, { responseType: 'blob' });
 
       const blob = new Blob([res.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
@@ -271,12 +269,11 @@ export default function Reports({ kundli, lagna, personName, kundliId }) {
     setError('');
     setReport(null);
     try {
-      const res = await api.post('/report/preview-status', {
-        kundli,
-        lagna,
-        report_type: type,
-        person_name: personName,
-      });
+const res = await api.post('/report/preview-status', {
+  kundli, lagna, report_type: type, person_name: personName,
+  birth_date: birthDate || '', birth_time: birthTime || '', birth_place: birthPlace || '',
+});
+
       setReport(res.data);
     } catch (err) {
       setError(err.response?.data?.detail || 'Could not generate report. Please try again.');

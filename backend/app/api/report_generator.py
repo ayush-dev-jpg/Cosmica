@@ -3,10 +3,14 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional
-from app.core.database import db
+from app.core import database as _db_module
 from app.core.config import settings
 import asyncio, httpx, io
 from datetime import datetime
+
+def get_db():
+    """Lazy db getter — always uses current connection"""
+    return _db_module.db
 
 router = APIRouter(prefix="/report", tags=["Report"])
 
@@ -118,13 +122,13 @@ async def fetch_section_knowledge(sdef, pp, lagna, lagna_idx, lords_map):
             # Fetch planet-in-house for each planet IN this house
             for pname in house_planets:
                 pdata = pp.get(pname, {})
-                d = await db.planet_house_knowledge.find_one({"planet":pname,"house":h,"lagna":lagna})
-                if not d: d = await db.planet_house_knowledge.find_one({"planet":pname,"house":h,"lagna":None})
+                d = await get_db().planet_house_knowledge.find_one({"planet":pname,"house":h,"lagna":lagna})
+                if not d: d = await get_db().planet_house_knowledge.find_one({"planet":pname,"house":h,"lagna":None})
                 if d and d.get('text'):
                     db_knowledge.append({'type':'planet_house','title':f"{pname} in House {h}",'text':d['text']})
 
                 # Planet in sign
-                d2 = await db.planet_sign_knowledge.find_one({"planet":pname,"rashi":pdata.get('rashi','')})
+                d2 = await get_db().planet_sign_knowledge.find_one({"planet":pname,"rashi":pdata.get('rashi','')})
                 if d2 and d2.get('text'):
                     db_knowledge.append({'type':'planet_sign','title':f"{pname} in {pdata.get('rashi_en','')}",'text':d2['text']})
 
@@ -136,10 +140,10 @@ async def fetch_section_knowledge(sdef, pp, lagna, lagna_idx, lords_map):
                     owned = lords_map.get(lord, [])
                     if isinstance(owned, int): owned = [owned]
                     for oh in owned:
-                        d3 = await db.lord_in_house_knowledge.find_one(
+                        d3 = await get_db().lord_in_house_knowledge.find_one(
                             {"lord_house": oh, "placed_in_house": lord_actual_house, "lagna": lagna})
                         if not d3:
-                            d3 = await db.lord_in_house_knowledge.find_one(
+                            d3 = await get_db().lord_in_house_knowledge.find_one(
                                 {"lord_house": oh, "placed_in_house": lord_actual_house, "lagna": None})
                         if d3 and d3.get('text'):
                             db_knowledge.append({
@@ -155,13 +159,13 @@ async def fetch_section_knowledge(sdef, pp, lagna, lagna_idx, lords_map):
             pdata = pp.get(pname, {})
 
             # Planet in house
-            d = await db.planet_house_knowledge.find_one({"planet":pname,"house":actual_house,"lagna":lagna})
-            if not d: d = await db.planet_house_knowledge.find_one({"planet":pname,"house":actual_house,"lagna":None})
+            d = await get_db().planet_house_knowledge.find_one({"planet":pname,"house":actual_house,"lagna":lagna})
+            if not d: d = await get_db().planet_house_knowledge.find_one({"planet":pname,"house":actual_house,"lagna":None})
             if d and d.get('text'):
                 db_knowledge.append({'type':'planet_house','title':f"{pname} in House {actual_house}",'text':d['text']})
 
             # Planet in sign
-            d2 = await db.planet_sign_knowledge.find_one({"planet":pname,"rashi":rashi})
+            d2 = await get_db().planet_sign_knowledge.find_one({"planet":pname,"rashi":rashi})
             if d2 and d2.get('text'):
                 db_knowledge.append({'type':'planet_sign','title':f"{pname} in {rashi_en}",'text':d2['text']})
 
@@ -169,10 +173,10 @@ async def fetch_section_knowledge(sdef, pp, lagna, lagna_idx, lords_map):
             owned = lords_map.get(pname, [])
             if isinstance(owned, int): owned = [owned]
             for oh in (owned or []):
-                d3 = await db.lord_in_house_knowledge.find_one(
+                d3 = await get_db().lord_in_house_knowledge.find_one(
                     {"lord_house": oh, "placed_in_house": actual_house, "lagna": lagna})
                 if not d3:
-                    d3 = await db.lord_in_house_knowledge.find_one(
+                    d3 = await get_db().lord_in_house_knowledge.find_one(
                         {"lord_house": oh, "placed_in_house": actual_house, "lagna": None})
                 if d3 and d3.get('text'):
                     db_knowledge.append({
@@ -264,9 +268,9 @@ async def report_preview(req: ReportRequest):
         })
 
     base_knowledge = []
-    r = await db.rashi_knowledge.find_one({"rashi": lagna})
+    r = await get_db().rashi_knowledge.find_one({"rashi": lagna})
     if r and r.get('text'): base_knowledge.append({'type':'rashi','title':f"Lagna: {lagna}",'text':r['text']})
-    n = await db.nakshatra_knowledge.find_one({"nakshatra": nakshatra})
+    n = await get_db().nakshatra_knowledge.find_one({"nakshatra": nakshatra})
     if n and n.get('text'): base_knowledge.append({'type':'nakshatra','title':f"Nakshatra: {nakshatra}",'text':n['text']})
 
     return {
