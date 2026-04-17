@@ -400,170 +400,82 @@ async def generate_pdf(req: ReportRequest):
 
         # ── Header / footer callbacks ────────────────────────────
         def first_page(c, doc):
-            import random, math
             c.saveState()
-
-            # ── Deep cosmos background ───────────────────────────
-            c.setFillColor(HexColor('#05010f'))
+            # Deep space background
+            c.setFillColor(C_DEEP)
             c.rect(0, 0, W, H, fill=1, stroke=0)
 
-            # Layered purple nebula clouds (overlapping ellipses)
-            nebula_specs = [
-                (W*0.15, H*0.75, 80*mm, 55*mm, 0.10, '#6d28d9'),
-                (W*0.80, H*0.65, 70*mm, 45*mm, 0.09, '#7c3aed'),
-                (W*0.50, H*0.40, 110*mm, 60*mm, 0.07, '#4c1d95'),
-                (W*0.30, H*0.20, 65*mm, 40*mm, 0.08, '#5b21b6'),
-                (W*0.75, H*0.30, 55*mm, 35*mm, 0.07, '#7c3aed'),
-                (W*0.50, H*0.55, 130*mm, 80*mm, 0.04, '#3b0764'),
-            ]
-            for nx, ny, nw, nh, alpha, col in nebula_specs:
-                r, g, b = tuple(int(col[i:i+2], 16)/255 for i in (1,3,5))
-                c.setFillColorRGB(r, g, b, alpha=alpha)
-                c.ellipse(nx - nw/2, ny - nh/2, nx + nw/2, ny + nh/2, fill=1, stroke=0)
+            # Subtle gradient bands
+            for i, alpha in enumerate([0.04, 0.03, 0.02]):
+                c.setFillColorRGB(0.48, 0.23, 0.93, alpha=alpha)
+                c.rect(0, H * (0.25 * i), W, H * 0.3, fill=1, stroke=0)
 
-            # Gold horizon glow strip
-            for i in range(8):
-                alpha = 0.06 - i * 0.007
-                if alpha <= 0: break
-                c.setFillColorRGB(0.96, 0.62, 0.04, alpha=alpha)
-                c.rect(0, H*0.38 - i*3, W, 6, fill=1, stroke=0)
+            # Stars
+            import random; random.seed(42)
+            c.setFillColor(C_WHITE)
+            for _ in range(120):
+                x, y = random.uniform(0, W), random.uniform(0, H)
+                r = random.uniform(0.3, 1.8)
+                c.setFillColorRGB(1, 1, 1, alpha=random.uniform(0.3, 0.9))
+                c.circle(x, y, r, fill=1, stroke=0)
 
-            # Stars — three layers (tiny, medium, bright)
-            random.seed(77)
-            for size, count, min_a, max_a in [
-                (0.4, 180, 0.2, 0.5),
-                (0.9, 60,  0.4, 0.8),
-                (1.6, 18,  0.7, 1.0),
-            ]:
-                for _ in range(count):
-                    sx = random.uniform(0, W)
-                    sy = random.uniform(0, H)
-                    alpha = random.uniform(min_a, max_a)
-                    c.setFillColorRGB(1, 1, 1, alpha=alpha)
-                    c.circle(sx, sy, size, fill=1, stroke=0)
+            # Top brand bar
+            c.setFillColor(HexColor('#1a0a3d'))
+            c.rect(0, H - 18*mm, W, 18*mm, fill=1, stroke=0)
+            c.setFillColor(C_GOLD)
+            c.rect(0, H - 18*mm, W, 1, fill=1, stroke=0)
+            c.setFillColor(C_PURPLE_LT)
+            c.setFont('Helvetica', 9)
+            c.drawCentredString(W/2, H - 12*mm, '✦   C O S M I C A   ✦')
 
-            # Shooting star
-            c.setStrokeColorRGB(1, 1, 1, alpha=0.35)
-            c.setLineWidth(0.6)
-            c.line(W*0.12, H*0.82, W*0.26, H*0.76)
-
-            # ── Decorative mandala / compass ring ───────────────
-            cx, cy = W/2, H*0.56
-            for ring_r, ring_w, ring_alpha, ring_col in [
-                (52*mm, 0.4, 0.35, '#a78bfa'),
-                (48*mm, 0.3, 0.20, '#c4b5fd'),
-                (38*mm, 0.8, 0.50, '#7c3aed'),
-                (35*mm, 0.3, 0.25, '#a78bfa'),
-            ]:
-                r2, g2, b2 = tuple(int(ring_col[i:i+2], 16)/255 for i in (1,3,5))
-                c.setStrokeColorRGB(r2, g2, b2, alpha=ring_alpha)
-                c.setLineWidth(ring_w)
-                c.circle(cx, cy, ring_r, fill=0, stroke=1)
-
-            # 8 compass tick marks on outer ring
-            c.setStrokeColorRGB(0.75, 0.55, 0.98, alpha=0.6)
-            for tick in range(8):
-                angle = math.radians(tick * 45)
-                ox = cx + math.cos(angle) * 48*mm
-                oy = cy + math.sin(angle) * 48*mm
-                ex = cx + math.cos(angle) * 54*mm
-                ey = cy + math.sin(angle) * 54*mm
-                c.setLineWidth(1.2 if tick % 2 == 0 else 0.6)
-                c.line(ox, oy, ex, ey)
-
-            # Diamond at 4 cardinal points
-            c.setFillColorRGB(0.97, 0.62, 0.04, alpha=0.9)
-            for angle in [0, 90, 180, 270]:
-                rad = math.radians(angle)
-                dx = cx + math.cos(rad) * 52*mm
-                dy = cy + math.sin(rad) * 52*mm
-                d = 2.2
-                c.beginPath()
-                c.moveTo(dx, dy + d*2)
-                c.lineTo(dx + d, dy)
-                c.lineTo(dx, dy - d*2)
-                c.lineTo(dx - d, dy)
-                c.closePath()
-                c.fill()
-
-            # Inner filled dark circle
-            c.setFillColor(HexColor('#0d0520'))
-            c.circle(cx, cy, 33*mm, fill=1, stroke=0)
-
-            # ── Cosmica logo inside circle ───────────────────────
-            # Outer glyph — stylised star/sun
-            c.setStrokeColorRGB(0.97, 0.62, 0.04, alpha=0.9)
-            c.setLineWidth(1.0)
-            for spoke in range(8):
-                ang = math.radians(spoke * 45 + 22.5)
-                inner_r = 12*mm
-                outer_r = 20*mm if spoke % 2 == 0 else 15*mm
-                c.line(cx + math.cos(ang)*inner_r, cy + math.sin(ang)*inner_r,
-                       cx + math.cos(ang)*outer_r, cy + math.sin(ang)*outer_r)
-
-            # Inner circle accent
-            c.setStrokeColorRGB(0.66, 0.55, 0.98, alpha=0.8)
-            c.setLineWidth(0.8)
-            c.circle(cx, cy, 10*mm, fill=0, stroke=1)
-
-            # Centre dot
-            c.setFillColorRGB(0.97, 0.62, 0.04, alpha=1)
-            c.circle(cx, cy, 2.5, fill=1, stroke=0)
-
-            # ── COSMICA wordmark ─────────────────────────────────
-            c.setFillColorRGB(1, 1, 1, alpha=0.95)
-            c.setFont('Helvetica-Bold', 28)
-            c.drawCentredString(W/2, H*0.56 - 52*mm - 14*mm, 'COSMICA')
-
-            # Gold underline beneath wordmark
-            c.setStrokeColorRGB(0.97, 0.62, 0.04, alpha=0.8)
-            c.setLineWidth(1.5)
-            c.line(W/2 - 22*mm, H*0.56 - 52*mm - 17*mm,
-                   W/2 + 22*mm, H*0.56 - 52*mm - 17*mm)
-
-            # Tagline
-            c.setFillColorRGB(0.66, 0.55, 0.98, alpha=0.85)
-            c.setFont('Helvetica', 8)
-            c.drawCentredString(W/2, H*0.56 - 52*mm - 23*mm,
-                'V E D I C   A S T R O L O G Y')
-
-            # ── Report type pill (bottom area) ──────────────────
-            rt_text = (req.report_type or 'full_life').upper().replace('_', ' ') + '  REPORT'
-            pill_w = len(rt_text) * 6.2 + 24
-            pill_x = W/2 - pill_w/2
-            pill_y = H*0.14
-
-            # Pill glow shadow
-            c.setFillColorRGB(0.48, 0.23, 0.93, alpha=0.25)
-            c.roundRect(pill_x - 2, pill_y - 2, pill_w + 4, 11*mm + 4, 4*mm, fill=1, stroke=0)
-            # Pill body
+            # Report type badge
+            rt_text = (req.report_type or 'full_life').upper().replace('_', ' ') + ' REPORT'
+            badge_w = len(rt_text) * 5.5 + 20
+            bx = W/2 - badge_w/2
             c.setFillColor(C_PURPLE)
-            c.roundRect(pill_x, pill_y, pill_w, 11*mm, 4*mm, fill=1, stroke=0)
-            # Pill border
-            c.setStrokeColorRGB(0.67, 0.55, 0.98, alpha=0.6)
-            c.setLineWidth(0.8)
-            c.roundRect(pill_x, pill_y, pill_w, 11*mm, 4*mm, fill=0, stroke=1)
+            c.roundRect(bx, H - 36*mm, badge_w, 10*mm, 3*mm, fill=1, stroke=0)
             c.setFillColor(C_WHITE)
             c.setFont('Helvetica-Bold', 9)
-            c.drawCentredString(W/2, pill_y + 3.5*mm, rt_text)
+            c.drawCentredString(W/2, H - 30*mm, rt_text)
 
-            # ── Very bottom — confidential note ─────────────────
-            c.setFillColorRGB(0.28, 0.34, 0.42, alpha=0.8)
-            c.setFont('Helvetica', 7)
-            c.drawCentredString(W/2, 10*mm,
-                'This report is confidential and prepared exclusively for the native.')
+            # Name — large centred
+            c.setFillColor(C_GOLD)
+            c.setFont('Helvetica-Bold', 36)
+            c.drawCentredString(W/2, H/2 + 22*mm, req.person_name)
 
-            # ── Top — thin brand strip ───────────────────────────
-            c.setFillColorRGB(0.10, 0.04, 0.24, alpha=0.9)
-            c.rect(0, H - 10*mm, W, 10*mm, fill=1, stroke=0)
-            c.setStrokeColorRGB(0.48, 0.23, 0.93, alpha=0.5)
+            # Gold divider
+            c.setFillColor(C_GOLD)
+            c.rect(W/2 - 30*mm, H/2 + 16*mm, 60*mm, 1.5, fill=1, stroke=0)
+
+            # Lagna · Nakshatra · Moon
+            c.setFillColor(C_PURPLE_LT)
+            c.setFont('Helvetica', 12)
+            c.drawCentredString(W/2, H/2 + 8*mm,
+                f"{req.lagna} Lagna  ·  {report_data.get('nakshatra','')} Nakshatra")
+            c.setFillColor(HexColor('#94a3b8'))
+            c.setFont('Helvetica', 10)
+            c.drawCentredString(W/2, H/2, f"Moon in {report_data.get('moon_rashi','')}")
+
+            # Birth details card
+            card_y = H/2 - 42*mm
+            c.setFillColor(HexColor('#1a1040'))
+            c.roundRect(W/2 - 55*mm, card_y, 110*mm, 32*mm, 4*mm, fill=1, stroke=0)
+            c.setStrokeColor(C_PURPLE)
             c.setLineWidth(0.8)
-            c.line(0, H - 10*mm, W, H - 10*mm)
-            c.setFillColorRGB(0.66, 0.55, 0.98, alpha=0.7)
-            c.setFont('Helvetica', 7)
-            c.drawCentredString(W/2, H - 6.5*mm, 'cosmica.app  ·  Vedic Astrology  ·  Lahiri Ayanamsa')
+            c.roundRect(W/2 - 55*mm, card_y, 110*mm, 32*mm, 4*mm, fill=0, stroke=1)
 
-            # Footer note — INTENTIONALLY REUSED below, keep signature
+            c.setFillColor(HexColor('#94a3b8'))
+            c.setFont('Helvetica', 8)
+            c.drawCentredString(W/2, card_y + 22*mm, 'DATE OF BIRTH')
+            c.setFillColor(C_WHITE)
+            c.setFont('Helvetica-Bold', 10)
+            c.drawCentredString(W/2, card_y + 15*mm, req.birth_date or '—')
+            c.setFillColor(HexColor('#94a3b8'))
+            c.setFont('Helvetica', 8)
+            c.drawCentredString(W/2, card_y + 9*mm,
+                f"{req.birth_time or '—'}  ·  {req.birth_place or '—'}")
+
+            # Footer note
             c.setFillColor(HexColor('#475569'))
             c.setFont('Helvetica', 7)
             c.drawCentredString(W/2, 12*mm,
