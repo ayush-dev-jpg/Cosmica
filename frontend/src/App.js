@@ -15,6 +15,8 @@ import NotFound        from './pages/NotFound';
 import MoonSign from './pages/MoonSign';
 import Compatibility from './pages/Compatibility';
 import Panchang from './pages/Panchang';
+import TaraBalam from './pages/TaraBalam';
+
 
 function ProtectedRoute({ children }) {
   const { isLoggedIn, loading } = useAuth();
@@ -48,6 +50,7 @@ function AppRoutes() {
       <Route path="/moon-sign" element={<OpenRoute><MoonSign /></OpenRoute>} />
       <Route path="/compatibility" element={<Compatibility/>} />
       <Route path="/panchang" element={<Panchang />} />
+      <Route path="/tara-balam" element={<TaraBalam />} />
     </Routes>
   );
 }
