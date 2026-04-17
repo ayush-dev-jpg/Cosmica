@@ -604,8 +604,12 @@ async def generate_pdf(req: ReportRequest):
 
         # ── Helper: knowledge entry card ────────────────────────
         def knowledge_card(title, text, accent, light):
+            try:
+                accent_hex = '#%02x%02x%02x' % (int(accent.red*255), int(accent.green*255), int(accent.blue*255))
+            except Exception:
+                accent_hex = '#7c3aed'
             hdr = Paragraph(
-                f'<font color="{accent.hexval() if hasattr(accent,"hexval") else "#7c3aed"}"><b>{title}</b></font>',
+                f'<font color="{accent_hex}"><b>{title}</b></font>',
                 ParagraphStyle('kh', fontName='Helvetica-Bold', fontSize=10,
                                textColor=accent, leading=14, spaceAfter=4))
             body = Paragraph(text, sBodySm)
@@ -735,10 +739,18 @@ async def generate_pdf(req: ReportRequest):
                 plain = SECTION_PLAIN_TITLES.get(sec['name'], sec['name'])
                 # Short summary from ai_insight (first sentence)
                 ai = sec.get('ai_insight') or ''
-                summary = ai.split('.')[0][:90] + '.' if ai else sec['description']
+                if ai:
+                    first_sent = ai.split('.')[0]
+                    summary = (first_sent[:150] + '.') if len(first_sent) > 150 else (first_sent + '.')
+                else:
+                    summary = sec['description']
                 accent, light, _ = SEC_COLORS[i % len(SEC_COLORS)]
+                try:
+                    accent_hex = '#%02x%02x%02x' % (int(accent.red*255), int(accent.green*255), int(accent.blue*255))
+                except Exception:
+                    accent_hex = '#7c3aed'
                 cell = [
-                    Paragraph(f'<b><font color="{accent.hexval() if hasattr(accent,"hexval") else "#7c3aed"}">{icon}  {area}</font></b>',
+                    Paragraph(f'<b><font color="{accent_hex}">{area}</font></b>',
                         ParagraphStyle('sna', fontName='Helvetica-Bold', fontSize=10,
                                        textColor=accent, leading=14, spaceAfter=3)),
                     Paragraph(summary,
@@ -834,7 +846,7 @@ async def generate_pdf(req: ReportRequest):
             sBodySm))
         story.append(Spacer(1, 8))
         story.append(planet_positions_table(
-            report_data['kundli'].get('planetary_positions', {}) if 'kundli' in report_data else {},
+            req.kundli.get('planetary_positions', {}),
             lagna_idx))
         story.append(Spacer(1, 14))
 
@@ -1031,9 +1043,6 @@ async def generate_pdf(req: ReportRequest):
         story.append(quote_tbl)
 
         # ── BUILD ────────────────────────────────────────────────
-        # Patch: pass kundli into report_data for planet table
-        report_data['kundli'] = req.kundli
-
         doc = SimpleDocTemplate(buf, pagesize=A4,
             leftMargin=18*mm, rightMargin=18*mm,
             topMargin=17*mm, bottomMargin=14*mm)
