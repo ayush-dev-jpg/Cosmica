@@ -18,7 +18,8 @@ export default function Navbar() {
     { path:'/nakshatra',  label:'⭐ Nakshatra' },
     { path:'/moon-sign',  label:'🌙 Moon Sign' },
     { path:'/panchang', label:'🗓️ Panchang' },
-    { path:'/tara-balam', label:'⭐ Tara Balam' }
+    { path:'/tara-balam', label:'⭐ Tara Balam' },
+    { path:'/sade-sati', label:'♄ Sade Sati' }
 
   ];
   const ADMIN_LINKS = [
