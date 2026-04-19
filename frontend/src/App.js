@@ -16,6 +16,8 @@ import MoonSign from './pages/MoonSign';
 import Compatibility from './pages/Compatibility';
 import Panchang from './pages/Panchang';
 import TaraBalam from './pages/TaraBalam';
+import SadeSati from './pages/SadeSati';
+
 
 
 function ProtectedRoute({ children }) {
@@ -36,21 +38,29 @@ function OpenRoute({ children }) {
 
 function AppRoutes() {
   return (
-    <Routes>
+<Routes>
       <Route path="/"             element={<Landing />} />
       <Route path="/login"        element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/signup"       element={<PublicRoute><Signup /></PublicRoute>} />
+      
       <Route path="/chart"        element={<OpenRoute><Chart /></OpenRoute>} />
-      <Route path="/dashboard"    element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/chart/:id"    element={<ProtectedRoute><Chart /></ProtectedRoute>} />
+      
+      <Route path="/dashboard"    element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/admin"        element={<ProtectedRoute><Admin /></ProtectedRoute>} />
       <Route path="/my-knowledge" element={<ProtectedRoute><KnowledgeEditor /></ProtectedRoute>} />
-      <Route path="/nakshatra" element={<OpenRoute><Nakshatra /></OpenRoute>} />
+
+      <Route path="/nakshatra"    element={<OpenRoute><Nakshatra /></OpenRoute>} />
+      <Route path="/moon-sign"    element={<OpenRoute><MoonSign /></OpenRoute>} />
+      <Route path="/compatibility" element={<Compatibility />} />
+      <Route path="/panchang"     element={<Panchang />} />
+      <Route path="/tara-balam"   element={<TaraBalam />} />
+      
+      {/* Sade Sati - Make sure it's BEFORE the * route */}
+      <Route path="/sade-sati"    element={<OpenRoute><SadeSati /></OpenRoute>} />
+
+      {/* 404 - This must be the LAST route */}
       <Route path="*"             element={<NotFound />} />
-      <Route path="/moon-sign" element={<OpenRoute><MoonSign /></OpenRoute>} />
-      <Route path="/compatibility" element={<Compatibility/>} />
-      <Route path="/panchang" element={<Panchang />} />
-      <Route path="/tara-balam" element={<TaraBalam />} />
     </Routes>
   );
 }
