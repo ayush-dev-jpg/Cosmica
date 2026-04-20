@@ -19,3 +19,4 @@ timezonefinder>=6.5
 pytz==2024.1
 fpdf2>=2.8.0
 reportlab>=4.0.0google-auth==2.29.0
+google-auth==2.29.0
