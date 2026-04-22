@@ -34,7 +34,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   // Called after successful login or signup
-  const login = (accessToken, userData) => {
+  const login = (userData, accessToken) => {
     localStorage.setItem('cosmica_token', accessToken);
     setToken(accessToken);
     setUser(userData);
