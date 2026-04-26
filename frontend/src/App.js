@@ -17,6 +17,7 @@ import Compatibility from './pages/Compatibility';
 import Panchang from './pages/Panchang';
 import TaraBalam from './pages/TaraBalam';
 import SadeSati from './pages/SadeSati';
+import Synastry from './pages/Synastry';
 
 
 
@@ -55,6 +56,7 @@ function AppRoutes() {
       <Route path="/compatibility" element={<Compatibility />} />
       <Route path="/panchang"     element={<Panchang />} />
       <Route path="/tara-balam"   element={<TaraBalam />} />
+      <Route path="/synastry" element={<Synastry />} />
       
       {/* Sade Sati - Make sure it's BEFORE the * route */}
       <Route path="/sade-sati"    element={<OpenRoute><SadeSati /></OpenRoute>} />

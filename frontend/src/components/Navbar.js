@@ -19,7 +19,8 @@ export default function Navbar() {
     { path:'/moon-sign',  label:'🌙 Moon Sign' },
     { path:'/panchang', label:'🗓️ Panchang' },
     { path:'/tara-balam', label:'⭐ Tara Balam' },
-    { path:'/sade-sati', label:'♄ Sade Sati' }
+    { path:'/sade-sati', label:'♄ Sade Sati' },
+    { path:'/synastry', label:'💑 Synastry' }
 
   ];
   const ADMIN_LINKS = [
